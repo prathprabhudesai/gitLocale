@@ -1,6 +1,6 @@
 var userLocationData = [];
-var client_id = "client_id=a40e72346ffa5a1f204a"
-var client_secret = "client_secret=d38d96cb36d5a3128ba8a4d4b5de98259980e8c6"
+var client_id = "client_id=xxxxx"
+var client_secret = "client_secret=xxxxx"
 var names = []
 var locations = []
 
