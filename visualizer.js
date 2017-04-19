@@ -1,6 +1,6 @@
 var userLocationData = [];
-var client_id = "client_id=xxxxx"
-var client_secret = "client_secret=xxxxx"
+var client_id = "client_id=a40e72346ffa5a1f204a"
+var client_secret = "client_secret=d38d96cb36d5a3128ba8a4d4b5de98259980e8c6"
 var names = []
 var locations = []
 
@@ -21,6 +21,31 @@ function unpack(rows, key) {
   return rows.map(function(row) { return row[key]; });
 }
 
+function extractUserRepoNames(repo_name){
+  var chunks = repo_name.split("/");
+  return{
+    user: chunks[3],
+    repo: chunks[4]
+  };
+}
+
+
+function getTheRepoId(repositories,repo){
+  for(var i=0; i < repositories.length; i++){
+    if(repositories[i].name == repo)
+      return repositories[i].id;
+  }
+}
+
+function extractUserLocationData(contributors){
+  for(var i=0; i < contributors.length; i++){
+    var content = getJSONFile(contributors[i].url + "?" + client_id + "&" + client_secret);
+    userLocationData.push({location: content.location, name:content.name });
+  }
+}
+
+
+
 function main() {
   var info = extractUserRepoNames(document.getElementById("name_repo").value);
   var repositories = getJSONFile("https://api.github.com/users/" + info.user + "/repos?" + client_id + "&" + client_secret);
@@ -36,14 +61,10 @@ function main() {
           locations.push(userLocationData[i].location);
         }
       }
-
       var location_map = getUniqueMap(locations)
-
       for(var i=0; i<locations.length; i++){
         location_map[locations[i]] += 1
       }
-
-
       var data_values = [];
       var data_labels = Object.keys(location_map);
       for (var i = 0; i < data_labels.length; i++) {
@@ -51,25 +72,37 @@ function main() {
       }
 
 
-      if (typeof(url) !== "string")  throw "getJSONFile: parameter not a string";
-      else {
-        var httpReq = new XMLHttpRequest(); // a new http request
-        httpReq.open("GET",url,false); // init the request
-        httpReq.send(null); // send the request
-        var startTime = Date.now();
-        while ((httpReq.status !== 200) && (httpReq.readyState !== XMLHttpRequest.DONE)) {
-          if ((Date.now()-startTime) > 3000)
-            break;
-        } // until its loaded or we time out after three seconds
-        if ((httpReq.status !== 200) || (httpReq.readyState !== XMLHttpRequest.DONE))
-          throw "Unable to open JSON file!";
-        else
-          return JSON.parse(httpReq.response);
-      } // end if good params
-    } // end try
+      var data = [{
+        values: data_values,
+        labels: data_labels,
+        type: 'pie'
+      }];
 
-    catch(e) {
-      console.log(e);
-      return(String.null);
+      var layout = {
+        height: 750,
+        width: 750
+      };
+      document.getElementById('graph').style.display = 'block';
+      Plotly.newPlot('graph', data, layout);
+
     }
   }
+}
+
+function getJSONFile(url){
+  if (typeof(url) !== "string")  throw "getJSONFile: parameter not a string";
+  else {
+    var httpReq = new XMLHttpRequest(); // a new http request
+    httpReq.open("GET",url,false); // init the request
+    httpReq.send(null); // send the request
+    var startTime = Date.now();
+    while ((httpReq.status !== 200) && (httpReq.readyState !== XMLHttpRequest.DONE)) {
+      if ((Date.now()-startTime) > 3000)
+        break;
+    } // until its loaded or we time out after three seconds
+    if ((httpReq.status !== 200) || (httpReq.readyState !== XMLHttpRequest.DONE))
+      throw "Unable to open JSON file!";
+    else
+      return JSON.parse(httpReq.response);
+  } // end if good params
+}
