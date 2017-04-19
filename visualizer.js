@@ -1,26 +1,19 @@
 var userLocationData = [];
-var client_id = "client_id=a40e72346ffa5a1f204a"
-var client_secret = "client_secret=d38d96cb36d5a3128ba8a4d4b5de98259980e8c6"
+var client_id = "client_id=xxxxxx"
+var client_secret = "client_secret=xxxxxx"
 var names = []
 var locations = []
-
-
 function getUniqueMap(arr) {
   var o = {}
   for (var i = 0; i < arr.length; i++) o[arr[i]] = 1
   return o
 }
-
-
 function getHeightWidth(arr){
   return (arr.length*20 > 700 ? 700 : arr.length*20);
 }
-
-
 function unpack(rows, key) {
   return rows.map(function(row) { return row[key]; });
 }
-
 function extractUserRepoNames(repo_name){
   var chunks = repo_name.split("/");
   return{
@@ -28,27 +21,23 @@ function extractUserRepoNames(repo_name){
     repo: chunks[4]
   };
 }
-
-
 function getTheRepoId(repositories,repo){
   for(var i=0; i < repositories.length; i++){
+    console.log(repositories[i].name);
     if(repositories[i].name == repo)
       return repositories[i].id;
   }
 }
-
 function extractUserLocationData(contributors){
   for(var i=0; i < contributors.length; i++){
     var content = getJSONFile(contributors[i].url + "?" + client_id + "&" + client_secret);
     userLocationData.push({location: content.location, name:content.name });
   }
 }
-
-
-
 function main() {
   var info = extractUserRepoNames(document.getElementById("name_repo").value);
   var repositories = getJSONFile("https://api.github.com/users/" + info.user + "/repos?" + client_id + "&" + client_secret);
+
   if(repositories != String.null) {
     var repository_id = getTheRepoId(repositories,info.repo)
     var contributors = getJSONFile("https://api.github.com/repositories/" + repository_id + "/contributors?" + client_id + "&" + client_secret);
@@ -88,7 +77,6 @@ function main() {
     }
   }
 }
-
 function getJSONFile(url){
   if (typeof(url) !== "string")  throw "getJSONFile: parameter not a string";
   else {
